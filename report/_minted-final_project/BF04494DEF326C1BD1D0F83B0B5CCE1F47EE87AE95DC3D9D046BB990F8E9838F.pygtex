@@ -1,0 +1,27 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{c+cm}{/**}
+\PYG{c+cm}{ * @file key.c}
+\PYG{c+cm}{ * @author John McAvoy}
+\PYG{c+cm}{ * @date 11 Dec 2018}
+\PYG{c+cm}{ * @desc provides Key enum typdef}
+\PYG{c+cm}{ */}
+
+\PYG{c+cp}{\PYGZsh{}include} \PYG{c+cpf}{\PYGZdq{}Key.h\PYGZdq{}}
+
+\PYG{k+kt}{char} \PYG{n+nf}{key2Char}\PYG{p}{(}\PYG{n}{Key} \PYG{n}{k}\PYG{p}{)} \PYG{p}{\PYGZob{}}
+    \PYG{k}{switch}\PYG{p}{(}\PYG{n}{k}\PYG{p}{)} \PYG{p}{\PYGZob{}}
+        \PYG{k}{case} \PYG{n+nl}{KEY\PYGZus{}0}\PYG{p}{:} \PYG{k}{return} \PYG{l+s+sc}{\PYGZsq{}0\PYGZsq{}}\PYG{p}{;}
+        \PYG{k}{case} \PYG{n+nl}{KEY\PYGZus{}1}\PYG{p}{:} \PYG{k}{return} \PYG{l+s+sc}{\PYGZsq{}1\PYGZsq{}}\PYG{p}{;}
+        \PYG{k}{case} \PYG{n+nl}{KEY\PYGZus{}2}\PYG{p}{:} \PYG{k}{return} \PYG{l+s+sc}{\PYGZsq{}2\PYGZsq{}}\PYG{p}{;}
+        \PYG{k}{case} \PYG{n+nl}{KEY\PYGZus{}3}\PYG{p}{:} \PYG{k}{return} \PYG{l+s+sc}{\PYGZsq{}3\PYGZsq{}}\PYG{p}{;}
+        \PYG{k}{case} \PYG{n+nl}{KEY\PYGZus{}4}\PYG{p}{:} \PYG{k}{return} \PYG{l+s+sc}{\PYGZsq{}4\PYGZsq{}}\PYG{p}{;}
+        \PYG{k}{case} \PYG{n+nl}{KEY\PYGZus{}5}\PYG{p}{:} \PYG{k}{return} \PYG{l+s+sc}{\PYGZsq{}5\PYGZsq{}}\PYG{p}{;}
+        \PYG{k}{case} \PYG{n+nl}{KEY\PYGZus{}6}\PYG{p}{:} \PYG{k}{return} \PYG{l+s+sc}{\PYGZsq{}6\PYGZsq{}}\PYG{p}{;}
+        \PYG{k}{case} \PYG{n+nl}{KEY\PYGZus{}7}\PYG{p}{:} \PYG{k}{return} \PYG{l+s+sc}{\PYGZsq{}7\PYGZsq{}}\PYG{p}{;}
+        \PYG{k}{case} \PYG{n+nl}{KEY\PYGZus{}8}\PYG{p}{:} \PYG{k}{return} \PYG{l+s+sc}{\PYGZsq{}8\PYGZsq{}}\PYG{p}{;}
+        \PYG{k}{case} \PYG{n+nl}{KEY\PYGZus{}9}\PYG{p}{:} \PYG{k}{return} \PYG{l+s+sc}{\PYGZsq{}9\PYGZsq{}}\PYG{p}{;}
+        \PYG{k}{case} \PYG{n+nl}{KEY\PYGZus{}ERR}\PYG{p}{:} \PYG{k}{return} \PYG{l+s+sc}{\PYGZsq{}?\PYGZsq{}}\PYG{p}{;}
+        \PYG{k}{default}\PYG{o}{:} \PYG{k}{return} \PYG{l+s+sc}{\PYGZsq{}!\PYGZsq{}}\PYG{p}{;}
+    \PYG{p}{\PYGZcb{}}
+\PYG{p}{\PYGZcb{}}
+\end{Verbatim}

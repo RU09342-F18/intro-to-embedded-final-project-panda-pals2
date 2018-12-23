@@ -1,0 +1,368 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{mcode}
+\usepackage{mathtools}
+\usepackage{amsmath}
+\usepackage{color}
+\usepackage{xfrac}
+\usepackage{flushend}
+\usepackage{wrapfig}
+\usepackage{minted}
+\usepackage{mdframed}
+\usepackage{etoolbox,xpatch}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=black
+  }
+
+
+\setminted{fontsize=\small,baselinestretch=1}
+
+\lstset{language=C,keywordstyle={\bfseries \color{black}}}
+
+\NewDocumentCommand{\codeword}{v}{
+  \texttt{\textcolor{black}{#1}}
+}
+
+\makeatletter
+\AtBeginEnvironment{minted}{\dontdofcolorbox}
+\def\dontdofcolorbox{\renewcommand\fcolorbox[4][]{##4}}
+\xpatchcmd{\inputminted}{\minted@fvset}{\minted@fvset\dontdofcolorbox}{}{}
+\makeatother
+
+\lstset{
+   basicstyle=\fontsize{11}{13}\selectfont\firacode
+}
+
+\begin{document}
+
+
+\title{Final Project: Security Keypad Lock}
+\author{John McAvoy \\
+  Email: mcavoyj5@students.rowan.edu}
+
+\maketitle
+\tableofcontents
+
+\section{Project Description}
+This project was destined to be a security keypad, similar to the keypads found
+on digital safes and doors. The MSP430G2553 launchpad was used as well as a
+custom 12-button keypad that is used to enter and set combinations. The security
+keypad is able to set combinations, lock and unlock an electric lock, and
+communicate through UART.
+
+\section{Final Code}
+
+\subsection{src/msp430g2553\_keypad\_lock.c}
+
+\subsubsection{main}
+
+\begin{listing}[H]
+  \caption{src/msp430g2553\_keypad\_lock.c::main()}
+  \inputminted[linenos,firstline=1, lastline=29]{C}{../msp430g2553/src/msp430g2553_keypad_lock.c}
+\end{listing}
+
+The main function starts by stopping the watch dog timer. Then, it calls the
+setup functions for the lock pins, keypad pins, timeout timer, and UART. Next,
+it sends a welcome message to UART and then enables the global interrupt.
+
+\subsubsection{Timer0\_A1}
+
+\begin{listing}[H]
+  \caption{src/msp430g2553\_keypad\_lock.c::Timer0\_A1()}
+  \inputminted[linenos,firstline=29, lastline=42]{C}{../msp430g2553/src/msp430g2553_keypad_lock.c}
+\end{listing}
+
+The Timer0\_A1 interrupt service routine is called every time the timeout timer
+finishes its cycle. The service routine stops the timeout timer and then locks
+triggers the lock state.
+
+\subsubsection{USCI0RX\_ISR}
+
+\begin{listing}[H]
+  \caption{src/msp430g2553\_keypad\_lock.c::USCI0RX\_ISR()}
+  \inputminted[linenos,firstline=43, lastline=54]{C}{../msp430g2553/src/msp430g2553_keypad_lock.c}
+\end{listing}
+
+The USCI0RX interrupt service routine was not used, however this project could
+use this in the future to send commands via UART to the device.
+
+\subsubsection{Port\_1}
+
+\begin{listing}[H]
+  \caption{src/msp430g2553\_keypad\_lock.c::Port\_1()}
+  \inputminted[linenos,firstline=55, lastline=69]{C}{../msp430g2553/src/msp430g2553_keypad_lock.c}
+\end{listing}
+
+The Port\_1 interrupt service routine is called every time one of keypad keys
+that is connected to a P1 port is pressed. The service routine calls
+\codeword{handle_key_press}.
+
+\subsubsection{Port\_2}
+
+\begin{listing}[H]
+  \caption{src/msp430g2553\_keypad\_lock.c::Port\_2()}
+  \inputminted[linenos,firstline=70, lastline=]{C}{../msp430g2553/src/msp430g2553_keypad_lock.c}
+\end{listing}
+
+The Port\_2 interrupt service routine calls the same functions as the Port\_1
+interrupt service routine. This service will run whenever the keypad keys
+connected to P2 are pressed.
+
+\subsection{lib/uart.c}
+
+\begin{listing}[H]
+  \caption{lib/uart.h}
+  \inputminted[linenos,firstline=, lastline=]{C}{../msp430g2553/lib/uart.h}
+\end{listing}
+
+\subsubsection{setup\_uart}
+
+\begin{listing}[H]
+  \caption{lib/uart.c::setup\_uart()}
+  \inputminted[linenos,firstline=, lastline=18]{C}{../msp430g2553/lib/uart.c}
+\end{listing}
+
+Setup UART configures the UART to use P1.1 as RXD and P1.2 as TXD, uses the 1MHx
+clock and sets the baud rate at 9600.
+
+
+\subsubsection{send\_bytes}
+
+\begin{listing}[H]
+  \caption{lib/uart.c::send\_bytes()}
+  \inputminted[linenos,firstline=19, lastline=]{C}{../msp430g2553/lib/uart.c}
+\end{listing}
+
+Send bytes takes a pointer to a byte array and loops through the length of the
+array. For each character in the array, the loop waits for the TX buffer to be
+ready, then it writes the byte to \codeword{UCA0TXBUF} which sends the byte via
+UART.
+
+\subsection{lib/security.c}
+
+\begin{listing}[H]
+  \caption{lib/security.h}
+  \inputminted[linenos,firstline=, lastline=,fontsize=\tiny,
+  baselinestretch=1]{C}{../msp430g2553/lib/security.h}
+\end{listing}
+
+\subsubsection{setup\_lock\_pins}
+
+\begin{listing}[H]
+  \caption{lib/security.c::setup\_lock\_pins()}
+  \inputminted[linenos,firstline=, lastline=37]{C}{../msp430g2553/lib/security.c}
+\end{listing}
+
+The lock, unlock, and timeout pins are set to I/O mode and set to output
+direction. Then, the lock state is set.
+
+\subsubsection{setup\_timeout\_timer}
+
+\begin{listing}[H]
+  \caption{lib/security.c::setup\_timeout\_timer()}
+  \inputminted[linenos,firstline=38, lastline=47]{C}{../msp430g2553/lib/security.c}
+\end{listing}
+
+The timeout timer is used to delay combination inputs. The timer is configured
+to use the 32kHz clock to count to 3200 with the capture compare interrupt
+enabled. This makes the timeout delay 1 second.
+
+\subsubsection{set\_passcode}
+
+\begin{listing}[H]
+  \caption{lib/security.c::set\_passcode()}
+  \inputminted[linenos,firstline=48, lastline=57]{C}{../msp430g2553/lib/security.c}
+\end{listing}
+
+\codeword{set_passcode} is used to read a \codeword{Key} array, loop through the
+array and set the passcode to the \codeword{new_passcode}.
+
+\subsubsection{lock}
+
+\begin{listing}[H]
+  \caption{lib/security.c::lock()}
+  \inputminted[linenos,firstline=58, lastline=66]{C}{../msp430g2553/lib/security.c}
+\end{listing}
+
+The lock state sets the unlocked pin off and the locked pin on.
+
+\subsubsection{unlock}
+
+\begin{listing}[H]
+  \caption{lib/security.c::unlock()}
+  \inputminted[linenos,firstline=67, lastline=75]{C}{../msp430g2553/lib/security.c}
+\end{listing}
+
+The unlock state sets the unlocked pin on and the locked pin off.
+
+\subsubsection{start\_timeout\_timer}
+
+\begin{listing}[H]
+  \caption{lib/security.c::start\_timeout\_timer()}
+  \inputminted[linenos,firstline=76, lastline=84]{C}{../msp430g2553/lib/security.c}
+\end{listing}
+
+The timeout timer is turned on by seting \codeword{TA0CTL} into continuous mode.
+When the timer is started, the timout pin is set high.
+
+\subsubsection{stop\_timeout\_timer}
+
+\begin{listing}[H]
+  \caption{lib/security.c::stop\_timeout\_timer()}
+  \inputminted[linenos,firstline=85, lastline=93]{C}{../msp430g2553/lib/security.c}
+\end{listing}
+
+The timeout timer is turned off by setting \codeword{TACTL} to halt and
+\codeword{TAR}.
+
+\subsubsection{handle\_combination}
+
+\begin{listing}[H]
+  \caption{lib/security.c::handle\_combination()}
+  \inputminted[linenos,firstline=95, lastline=]{C}{../msp430g2553/lib/security.c}
+\end{listing}
+
+\subsection{lib/keypad.c}
+
+\begin{listing}[H]
+  \caption{lib/keypad.h}
+  \inputminted[linenos,firstline=8, lastline=,fontsize=\scriptsize,
+  baselinestretch=1]{C}{../msp430g2553/lib/keypad.h}
+\end{listing}
+
+\subsubsection{setup\_keypad\_pins}
+
+\begin{listing}[H]
+  \caption{lib/keypad.c::setup\_keypad\_pins()}
+  \inputminted[linenos,firstline=, lastline=40]{C}{../msp430g2553/lib/keypad.c}
+\end{listing}
+
+The keypad pins are connected to I/O pins in Port\_1 and Port\_2. All of the
+pins are set to I/O mode and the direction is set to input. Also, the Port\_1
+and Port\_2 interrupts are also enabled for each of the keypad keys.
+
+\subsubsection{clear\_key\_interrupt\_flags}
+
+\begin{listing}[H]
+  \caption{lib/keypad.c::setup\_keypad\_pins()}
+  \inputminted[linenos,firstline=41, lastline=49]{C}{../msp430g2553/lib/keypad.c}
+\end{listing}
+
+The keypad key interrupts are cleared by setting the corresponding bits
+\codeword{P1IFG} and \codeword{P2IIFG} low.
+
+\subsubsection{get\_key\_pressed}
+
+\begin{listing}[H]
+  \caption{lib/keypad.c::get\_key\_pressed}
+  \inputminted[linenos,firstline=50, lastline=69]{C}{../msp430g2553/lib/keypad.c}
+\end{listing}
+
+The \codeword{get_key_pressed} function returns the corresponding \codeword{Key}
+that is pressed by using bit masks on \codeword{P1} and \codeword{P2}.
+
+\subsubsection{handle\_key\_press}
+
+\begin{listing}[H]
+  \caption{lib/keypad.c::handle\_key\_press()}
+  \inputminted[linenos,firstline=70, lastline=84]{C}{../msp430g2553/lib/keypad.c}
+\end{listing}
+
+The \codeword{handle_key_press} function gets the \codeword{Key} that is pressed
+and adds it to the \codeword{combination_in} array. When the
+\codeword{combination_in} is full, then the \codeword{combination_in} is passed
+to \codeword{handle_combination}.
+
+\subsubsection{send\_combination\_in}
+
+\begin{listing}[H]
+  \caption{lib/keypad.c::send\_combination\_in()}
+  \inputminted[linenos,firstline=85, lastline=]{C}{../msp430g2553/lib/keypad.c}
+\end{listing}
+
+The \codeword{send_combinaiton_in} function creates an output character buffer
+that is sends the current combination entered via UART.
+
+\subsection{lib/Key.c}
+
+\begin{listing}[H]
+  \caption{lib/Key.h}
+  \inputminted[linenos,firstline=, lastline=]{C}{../msp430g2553/lib/Key.h}
+\end{listing}
+
+\subsubsection{key2Char}
+
+\begin{listing}[H]
+  \caption{lib/Key.c::key2Char}
+  \inputminted[linenos,firstline=, lastline=]{C}{../msp430g2553/lib/Key.c}
+\end{listing}
+
+The \codeword{Key} enum holds all the different types of key categories which
+makes it useful for passing keycodes between functions instead of numbers.
+\codeword{key2Char} is used to convert a \codeword{Key} into a printable
+character.
+
+\section{Unit Tests}
+
+\subsection{tests/keypad/keypad\_test.c}
+\begin{listing}[H]
+  \caption{tests/keypad/keypad\_test.c}
+  \inputminted[linenos,firstline=,
+  lastline=, fontsize=\scriptsize]{C}{../msp430g2553/tests/keypad/keypad_test.c}
+\end{listing}
+
+This unit test was used to test the \codeword{keypad.c} functions. Each time a
+key was pressed, its value was sent via UART for debugging.
+
+\subsection{tests/security/security\_test.c}
+\begin{listing}[H]
+  \caption{tests/keypad/security/security\_test.c}
+  \inputminted[linenos,firstline=,
+  lastline=,
+  fontsize=\tiny]{C}{../msp430g2553/tests/security/security_test.c}
+\end{listing}
+
+This unit test was used to test the \codeword{security.c} functions. Various
+\codeword{Key} combinations were sent to the \codeword{handle_combination}
+function to test that they work properly.
+
+\subsection{tests/timer/timer\_test.c}
+\begin{listing}[H]
+  \caption{tests/timer/timer\_test.c}
+  \inputminted[linenos,firstline=,
+  lastline=,
+  fontsize=\footnotesize]{C}{../msp430g2553/tests/timer/timer_test.c}
+\end{listing}
+
+This unit test was used to make sure that the timeout timer was configured
+correctly. Each time the interrupt was triggered, a message was via to UART.
+
+\subsection{tests/uart/uart\_test.c}
+\begin{listing}[H]
+  \caption{tests/uart/uart\_test.c}
+  \inputminted[linenos,firstline=,
+  lastline=,
+  fontsize=]{C}{../msp430g2553/tests/uart/uart_test.c}
+\end{listing}
+
+This unit test was used to test the \codeword{uart.c} functions.
+
+\section{Conclusions and Future Work}
+
+The keypad security lock works correctly, however it can be improved by adding
+encoding logic to reduce the number of I/O pins used. The MSP430G2553 does not
+have enough I/O pins for all 12 keys in the number pads. I originally designed
+the device to use a primary encoder that would reduce the 12 signals from the
+keypad into a 4-bit signal. I wasn't able to accomplish this circuit because all
+I had was 2-input OR gates and the circuit was too complicated to fit on a
+breadboard.
+
+\end{document}

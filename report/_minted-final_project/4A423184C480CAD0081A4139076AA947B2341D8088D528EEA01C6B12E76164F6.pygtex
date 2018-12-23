@@ -1,0 +1,101 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{c+cm}{/**}
+\PYG{c+cm}{ * @file keypad.c}
+\PYG{c+cm}{ * @author John McAvoy}
+\PYG{c+cm}{ * @date 11 Dec 2018}
+\PYG{c+cm}{ * @desc provides functions related to reading the keypad inputs}
+\PYG{c+cm}{ */}
+
+\PYG{c+cp}{\PYGZsh{}include} \PYG{c+cpf}{\PYGZlt{}msp430.h\PYGZgt{}}
+\PYG{c+cp}{\PYGZsh{}include} \PYG{c+cpf}{\PYGZlt{}stdio.h\PYGZgt{}}
+\PYG{c+cp}{\PYGZsh{}include} \PYG{c+cpf}{\PYGZdq{}keypad.h\PYGZdq{}}
+\PYG{c+cp}{\PYGZsh{}include} \PYG{c+cpf}{\PYGZdq{}security.h\PYGZdq{}}
+\PYG{c+cp}{\PYGZsh{}include} \PYG{c+cpf}{\PYGZdq{}uart.h\PYGZdq{}}
+\PYG{c+cp}{\PYGZsh{}include} \PYG{c+cpf}{\PYGZdq{}Key.h\PYGZdq{}}
+
+\PYG{c+cm}{/**}
+\PYG{c+cm}{ * @func setup\PYGZus{}keypad\PYGZus{}pins}
+\PYG{c+cm}{ * @desc initializes the appropriate I/O pins for reading the keypad}
+\PYG{c+cm}{ */}
+\PYG{k+kt}{void} \PYG{n+nf}{setup\PYGZus{}keypad\PYGZus{}pins}\PYG{p}{()} \PYG{p}{\PYGZob{}}
+    \PYG{c+c1}{// configure pins to I/O mode}
+    \PYG{n}{P1SEL} \PYG{o}{\PYGZam{}=} \PYG{o}{\PYGZti{}}\PYG{p}{(}\PYG{n}{P1KEYS}\PYG{p}{);}
+    \PYG{n}{P1SEL2} \PYG{o}{\PYGZam{}=} \PYG{o}{\PYGZti{}}\PYG{p}{(}\PYG{n}{P1KEYS}\PYG{p}{);}
+    \PYG{n}{P1REN} \PYG{o}{\PYGZam{}=} \PYG{o}{\PYGZti{}}\PYG{p}{(}\PYG{n}{P1KEYS}\PYG{p}{);}
+
+    \PYG{n}{P2SEL} \PYG{o}{\PYGZam{}=} \PYG{o}{\PYGZti{}}\PYG{p}{(}\PYG{n}{P2KEYS}\PYG{p}{);}
+    \PYG{n}{P2SEL2} \PYG{o}{\PYGZam{}=} \PYG{o}{\PYGZti{}}\PYG{p}{(}\PYG{n}{P2KEYS}\PYG{p}{);}
+    \PYG{n}{P2REN} \PYG{o}{\PYGZam{}=} \PYG{o}{\PYGZti{}}\PYG{p}{(}\PYG{n}{P2KEYS}\PYG{p}{);}
+
+    \PYG{c+c1}{// configure pins to inputs}
+    \PYG{n}{P1DIR} \PYG{o}{\PYGZam{}=} \PYG{o}{\PYGZti{}}\PYG{p}{(}\PYG{n}{P1KEYS}\PYG{p}{);}
+    \PYG{n}{P2DIR} \PYG{o}{\PYGZam{}=} \PYG{o}{\PYGZti{}}\PYG{p}{(}\PYG{n}{P2KEYS}\PYG{p}{);}
+
+    \PYG{c+c1}{// interrupt on low\PYGZhy{}to\PYGZhy{}high}
+    \PYG{n}{P1IES} \PYG{o}{\PYGZam{}=} \PYG{o}{\PYGZti{}}\PYG{p}{(}\PYG{n}{P1KEYS}\PYG{p}{);}
+    \PYG{n}{P2IES} \PYG{o}{\PYGZam{}=} \PYG{o}{\PYGZti{}}\PYG{p}{(}\PYG{n}{P2KEYS}\PYG{p}{);}
+
+    \PYG{c+c1}{// enables KF interrupt}
+    \PYG{n}{P1IE} \PYG{o}{|=} \PYG{p}{(}\PYG{n}{P1KEYS}\PYG{p}{);}
+    \PYG{n}{P2IE} \PYG{o}{|=} \PYG{p}{(}\PYG{n}{P2KEYS}\PYG{p}{);}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{c+cm}{/**}
+\PYG{c+cm}{ * @func clear\PYGZus{}key\PYGZus{}interupt\PYGZus{}flags}
+\PYG{c+cm}{ * @desc clears keypad port interrupt flags}
+\PYG{c+cm}{ */}
+\PYG{k+kt}{void} \PYG{n+nf}{clear\PYGZus{}key\PYGZus{}interupt\PYGZus{}flags}\PYG{p}{()} \PYG{p}{\PYGZob{}}
+    \PYG{n}{P1IFG} \PYG{o}{\PYGZam{}=} \PYG{o}{\PYGZti{}}\PYG{p}{(}\PYG{n}{P1KEYS}\PYG{p}{);}
+    \PYG{n}{P2IFG} \PYG{o}{\PYGZam{}=} \PYG{o}{\PYGZti{}}\PYG{p}{(}\PYG{n}{P2KEYS}\PYG{p}{);}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{c+cm}{/**}
+\PYG{c+cm}{ * @func get\PYGZus{}key\PYGZus{}pressed}
+\PYG{c+cm}{ * @desc determines the pressed key based on A3..A0 pins}
+\PYG{c+cm}{ * @returns Key enum corresponding to the key pressed}
+\PYG{c+cm}{ */}
+\PYG{n}{Key} \PYG{n+nf}{get\PYGZus{}key\PYGZus{}pressed}\PYG{p}{()} \PYG{p}{\PYGZob{}}
+
+    \PYG{k}{if}\PYG{p}{(}\PYG{n}{P1IN} \PYG{o}{\PYGZam{}} \PYG{n}{A9}\PYG{p}{)} \PYG{k}{return} \PYG{n}{KEY\PYGZus{}9}\PYG{p}{;}
+    \PYG{k}{if}\PYG{p}{(}\PYG{n}{P2IN} \PYG{o}{\PYGZam{}} \PYG{n}{A8}\PYG{p}{)} \PYG{k}{return} \PYG{n}{KEY\PYGZus{}8}\PYG{p}{;}
+    \PYG{k}{if}\PYG{p}{(}\PYG{n}{P2IN} \PYG{o}{\PYGZam{}} \PYG{n}{A7}\PYG{p}{)} \PYG{k}{return} \PYG{n}{KEY\PYGZus{}7}\PYG{p}{;}
+    \PYG{k}{if}\PYG{p}{(}\PYG{n}{P2IN} \PYG{o}{\PYGZam{}} \PYG{n}{A6}\PYG{p}{)} \PYG{k}{return} \PYG{n}{KEY\PYGZus{}6}\PYG{p}{;}
+    \PYG{k}{if}\PYG{p}{(}\PYG{n}{P2IN} \PYG{o}{\PYGZam{}} \PYG{n}{A5}\PYG{p}{)} \PYG{k}{return} \PYG{n}{KEY\PYGZus{}5}\PYG{p}{;}
+    \PYG{k}{if}\PYG{p}{(}\PYG{n}{P2IN} \PYG{o}{\PYGZam{}} \PYG{n}{A4}\PYG{p}{)} \PYG{k}{return} \PYG{n}{KEY\PYGZus{}4}\PYG{p}{;}
+    \PYG{k}{if}\PYG{p}{(}\PYG{n}{P1IN} \PYG{o}{\PYGZam{}} \PYG{n}{A3}\PYG{p}{)} \PYG{k}{return} \PYG{n}{KEY\PYGZus{}3}\PYG{p}{;}
+    \PYG{k}{if}\PYG{p}{(}\PYG{n}{P1IN} \PYG{o}{\PYGZam{}} \PYG{n}{A2}\PYG{p}{)} \PYG{k}{return} \PYG{n}{KEY\PYGZus{}2}\PYG{p}{;}
+    \PYG{k}{if}\PYG{p}{(}\PYG{n}{P1IN} \PYG{o}{\PYGZam{}} \PYG{n}{A1}\PYG{p}{)} \PYG{k}{return} \PYG{n}{KEY\PYGZus{}1}\PYG{p}{;}
+    \PYG{k}{if}\PYG{p}{(}\PYG{n}{P1IN} \PYG{o}{\PYGZam{}} \PYG{n}{A0}\PYG{p}{)} \PYG{k}{return} \PYG{n}{KEY\PYGZus{}0}\PYG{p}{;}
+    \PYG{k}{return} \PYG{n}{KEY\PYGZus{}ERR}\PYG{p}{;} \PYG{c+c1}{// default}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{k}{static} \PYG{n}{Key} \PYG{n}{combination\PYGZus{}in}\PYG{p}{[}\PYG{n}{PASSCODE\PYGZus{}LENGTH}\PYG{p}{];}
+\PYG{k}{static} \PYG{k+kt}{uint8\PYGZus{}t} \PYG{n}{in\PYGZus{}counter} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;}
+
+\PYG{k+kt}{void} \PYG{n+nf}{handle\PYGZus{}key\PYGZus{}press}\PYG{p}{()} \PYG{p}{\PYGZob{}}
+    \PYG{n}{Key} \PYG{n}{key\PYGZus{}in} \PYG{o}{=} \PYG{n}{get\PYGZus{}key\PYGZus{}pressed}\PYG{p}{();}
+    \PYG{k}{if}\PYG{p}{(}\PYG{n}{key\PYGZus{}in} \PYG{o}{!=} \PYG{n}{KEY\PYGZus{}ERR}\PYG{p}{)\PYGZob{}}
+        \PYG{n}{combination\PYGZus{}in}\PYG{p}{[}\PYG{n}{in\PYGZus{}counter}\PYG{o}{++}\PYG{p}{]} \PYG{o}{=} \PYG{n}{key\PYGZus{}in}\PYG{p}{;}
+        \PYG{n}{send\PYGZus{}combination\PYGZus{}in}\PYG{p}{();}
+        \PYG{k}{if} \PYG{p}{(}\PYG{n}{in\PYGZus{}counter} \PYG{o}{==} \PYG{n}{PASSCODE\PYGZus{}LENGTH}\PYG{p}{)} \PYG{p}{\PYGZob{}}
+            \PYG{n}{handle\PYGZus{}combiation}\PYG{p}{(}\PYG{n}{combination\PYGZus{}in}\PYG{p}{);}
+            \PYG{n}{in\PYGZus{}counter} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;}
+        \PYG{p}{\PYGZcb{}}
+    \PYG{p}{\PYGZcb{}}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{k+kt}{void} \PYG{n+nf}{send\PYGZus{}combination\PYGZus{}in}\PYG{p}{()} \PYG{p}{\PYGZob{}}
+    \PYG{k}{const} \PYG{k+kt}{char} \PYG{n}{buffer\PYGZus{}size} \PYG{o}{=} \PYG{p}{(}\PYG{n}{in\PYGZus{}counter} \PYG{o}{*} \PYG{l+m+mi}{2} \PYG{p}{);} \PYG{c+c1}{// 1\PYGZhy{}2\PYGZhy{}3\PYGZhy{}4}
+    \PYG{k+kt}{char} \PYG{n}{buffer}\PYG{p}{[}\PYG{n}{buffer\PYGZus{}size}\PYG{p}{];}
+
+    \PYG{k}{for}\PYG{p}{(}\PYG{k+kt}{uint8\PYGZus{}t} \PYG{n}{i} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;} \PYG{n}{i} \PYG{o}{\PYGZlt{}} \PYG{n}{in\PYGZus{}counter}\PYG{p}{;} \PYG{n}{i}\PYG{o}{++}\PYG{p}{)} \PYG{p}{\PYGZob{}}
+        \PYG{n}{buffer}\PYG{p}{[}\PYG{n}{i}\PYG{o}{*}\PYG{l+m+mi}{2}\PYG{p}{]} \PYG{o}{=} \PYG{n}{key2Char}\PYG{p}{(}\PYG{n}{combination\PYGZus{}in}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]);}
+    \PYG{p}{\PYGZcb{}}
+    \PYG{k}{for}\PYG{p}{(}\PYG{k+kt}{uint8\PYGZus{}t} \PYG{n}{i} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;} \PYG{n}{i} \PYG{o}{\PYGZlt{}} \PYG{n}{in\PYGZus{}counter} \PYG{o}{/} \PYG{l+m+mi}{2}\PYG{p}{;} \PYG{n}{i}\PYG{o}{++}\PYG{p}{)} \PYG{p}{\PYGZob{}}
+        \PYG{n}{buffer}\PYG{p}{[}\PYG{n}{i}\PYG{o}{*}\PYG{l+m+mi}{2}\PYG{o}{+}\PYG{l+m+mi}{1}\PYG{p}{]} \PYG{o}{=} \PYG{l+s+sc}{\PYGZsq{}\PYGZhy{}\PYGZsq{}}\PYG{p}{;}
+    \PYG{p}{\PYGZcb{}}
+
+    \PYG{n}{buffer}\PYG{p}{[}\PYG{n}{buffer\PYGZus{}size} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{1}\PYG{p}{]} \PYG{o}{=} \PYG{l+s+sc}{\PYGZsq{}\PYGZbs{}n\PYGZsq{}}\PYG{p}{;}
+    \PYG{n}{send\PYGZus{}bytes}\PYG{p}{(}\PYG{n}{buffer}\PYG{p}{,} \PYG{n}{buffer\PYGZus{}size}\PYG{p}{);}
+\PYG{p}{\PYGZcb{}}
+\end{Verbatim}

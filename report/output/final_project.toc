@@ -1,0 +1,34 @@
+\contentsline {section}{\numberline {1}Project Description}{2}{section.1}
+\contentsline {section}{\numberline {2}Final Code}{3}{section.2}
+\contentsline {subsection}{\numberline {2.1}src/msp430g2553\_keypad\_lock.c}{3}{subsection.2.1}
+\contentsline {subsubsection}{\numberline {2.1.1}main}{3}{subsubsection.2.1.1}
+\contentsline {subsubsection}{\numberline {2.1.2}Timer0\_A1}{4}{subsubsection.2.1.2}
+\contentsline {subsubsection}{\numberline {2.1.3}USCI0RX\_ISR}{4}{subsubsection.2.1.3}
+\contentsline {subsubsection}{\numberline {2.1.4}Port\_1}{5}{subsubsection.2.1.4}
+\contentsline {subsubsection}{\numberline {2.1.5}Port\_2}{5}{subsubsection.2.1.5}
+\contentsline {subsection}{\numberline {2.2}lib/uart.c}{6}{subsection.2.2}
+\contentsline {subsubsection}{\numberline {2.2.1}setup\_uart}{6}{subsubsection.2.2.1}
+\contentsline {subsubsection}{\numberline {2.2.2}send\_bytes}{7}{subsubsection.2.2.2}
+\contentsline {subsection}{\numberline {2.3}lib/security.c}{8}{subsection.2.3}
+\contentsline {subsubsection}{\numberline {2.3.1}setup\_lock\_pins}{9}{subsubsection.2.3.1}
+\contentsline {subsubsection}{\numberline {2.3.2}setup\_timeout\_timer}{10}{subsubsection.2.3.2}
+\contentsline {subsubsection}{\numberline {2.3.3}set\_passcode}{10}{subsubsection.2.3.3}
+\contentsline {subsubsection}{\numberline {2.3.4}lock}{11}{subsubsection.2.3.4}
+\contentsline {subsubsection}{\numberline {2.3.5}unlock}{11}{subsubsection.2.3.5}
+\contentsline {subsubsection}{\numberline {2.3.6}start\_timeout\_timer}{11}{subsubsection.2.3.6}
+\contentsline {subsubsection}{\numberline {2.3.7}stop\_timeout\_timer}{12}{subsubsection.2.3.7}
+\contentsline {subsubsection}{\numberline {2.3.8}handle\_combination}{12}{subsubsection.2.3.8}
+\contentsline {subsection}{\numberline {2.4}lib/keypad.c}{13}{subsection.2.4}
+\contentsline {subsubsection}{\numberline {2.4.1}setup\_keypad\_pins}{14}{subsubsection.2.4.1}
+\contentsline {subsubsection}{\numberline {2.4.2}clear\_key\_interrupt\_flags}{15}{subsubsection.2.4.2}
+\contentsline {subsubsection}{\numberline {2.4.3}get\_key\_pressed}{15}{subsubsection.2.4.3}
+\contentsline {subsubsection}{\numberline {2.4.4}handle\_key\_press}{16}{subsubsection.2.4.4}
+\contentsline {subsubsection}{\numberline {2.4.5}send\_combination\_in}{16}{subsubsection.2.4.5}
+\contentsline {subsection}{\numberline {2.5}lib/Key.c}{17}{subsection.2.5}
+\contentsline {subsubsection}{\numberline {2.5.1}key2Char}{18}{subsubsection.2.5.1}
+\contentsline {section}{\numberline {3}Unit Tests}{20}{section.3}
+\contentsline {subsection}{\numberline {3.1}tests/keypad/keypad\_test.c}{20}{subsection.3.1}
+\contentsline {subsection}{\numberline {3.2}tests/security/security\_test.c}{22}{subsection.3.2}
+\contentsline {subsection}{\numberline {3.3}tests/timer/timer\_test.c}{23}{subsection.3.3}
+\contentsline {subsection}{\numberline {3.4}tests/uart/uart\_test.c}{24}{subsection.3.4}
+\contentsline {section}{\numberline {4}Conclusions and Future Work}{25}{section.4}

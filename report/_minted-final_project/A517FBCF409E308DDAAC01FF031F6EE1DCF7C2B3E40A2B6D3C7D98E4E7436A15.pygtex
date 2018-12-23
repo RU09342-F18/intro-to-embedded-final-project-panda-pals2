@@ -1,0 +1,78 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{c+cm}{/**}
+\PYG{c+cm}{ * @file security\PYGZus{}test.c}
+\PYG{c+cm}{ * @author John McAvoy}
+\PYG{c+cm}{ * @date 11 Dec 2018}
+\PYG{c+cm}{ * @desc test program for security\PYGZus{}test.c}
+\PYG{c+cm}{ */}
+
+\PYG{c+cp}{\PYGZsh{}include} \PYG{c+cpf}{\PYGZlt{}msp430.h\PYGZgt{}}
+\PYG{c+cp}{\PYGZsh{}include} \PYG{c+cpf}{\PYGZlt{}stdio.h\PYGZgt{}}
+\PYG{c+cp}{\PYGZsh{}include} \PYG{c+cpf}{\PYGZdq{}../../lib/Key.h\PYGZdq{}}
+\PYG{c+cp}{\PYGZsh{}include} \PYG{c+cpf}{\PYGZdq{}../../lib/security.h\PYGZdq{}}
+\PYG{c+cp}{\PYGZsh{}include} \PYG{c+cpf}{\PYGZdq{}../../lib/uart.h\PYGZdq{}}
+
+\PYG{k+kt}{int} \PYG{n+nf}{main}\PYG{p}{(}\PYG{k+kt}{void}\PYG{p}{)}
+\PYG{p}{\PYGZob{}}
+  \PYG{n}{WDTCTL} \PYG{o}{=} \PYG{n}{WDTPW} \PYG{o}{+} \PYG{n}{WDTHOLD}\PYG{p}{;}                 \PYG{c+c1}{// Stop watchdog timer}
+  \PYG{n}{setup\PYGZus{}uart}\PYG{p}{();}
+  \PYG{n}{setup\PYGZus{}lock\PYGZus{}pins}\PYG{p}{();}
+
+  \PYG{k+kt}{char} \PYG{n}{start\PYGZus{}message}\PYG{p}{[}\PYG{l+m+mi}{25}\PYG{p}{]} \PYG{o}{=} \PYG{l+s}{\PYGZdq{}Start of Security Test}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s}{\PYGZdq{}}\PYG{p}{;}
+  \PYG{n}{send\PYGZus{}bytes}\PYG{p}{(}\PYG{n}{start\PYGZus{}message}\PYG{p}{,} \PYG{l+m+mi}{20}\PYG{p}{);}
+
+  \PYG{k+kt}{char} \PYG{n}{locking\PYGZus{}message}\PYG{p}{[}\PYG{l+m+mi}{13}\PYG{p}{]} \PYG{o}{=} \PYG{l+s}{\PYGZdq{}Locking Test}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s}{\PYGZdq{}}\PYG{p}{;}
+  \PYG{n}{send\PYGZus{}bytes}\PYG{p}{(}\PYG{n}{locking\PYGZus{}message}\PYG{p}{,} \PYG{l+m+mi}{13}\PYG{p}{);}
+
+  \PYG{c+c1}{// locking test}
+  \PYG{k+kt}{char} \PYG{n}{unlock\PYGZus{}message}\PYG{p}{[}\PYG{l+m+mi}{7}\PYG{p}{]} \PYG{o}{=} \PYG{l+s}{\PYGZdq{}Unlock}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s}{\PYGZdq{}}\PYG{p}{;}
+  \PYG{n}{send\PYGZus{}bytes}\PYG{p}{(}\PYG{n}{unlock\PYGZus{}message}\PYG{p}{,} \PYG{l+m+mi}{7}\PYG{p}{);}
+  \PYG{n}{unlock}\PYG{p}{();}
+  \PYG{n}{\PYGZus{}\PYGZus{}delay\PYGZus{}cycles}\PYG{p}{(}\PYG{l+m+mi}{1000000}\PYG{p}{);}
+  \PYG{k+kt}{char} \PYG{n}{lock\PYGZus{}message}\PYG{p}{[}\PYG{l+m+mi}{5}\PYG{p}{]} \PYG{o}{=} \PYG{l+s}{\PYGZdq{}Lock}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s}{\PYGZdq{}}\PYG{p}{;}
+  \PYG{n}{send\PYGZus{}bytes}\PYG{p}{(}\PYG{n}{lock\PYGZus{}message}\PYG{p}{,} \PYG{l+m+mi}{5}\PYG{p}{);}
+  \PYG{n}{lock}\PYG{p}{();}
+
+  \PYG{n}{\PYGZus{}\PYGZus{}delay\PYGZus{}cycles}\PYG{p}{(}\PYG{l+m+mi}{1000000}\PYG{p}{);}
+
+  \PYG{k+kt}{char} \PYG{n}{cc\PYGZus{}message}\PYG{p}{[}\PYG{l+m+mi}{20}\PYG{p}{]} \PYG{o}{=} \PYG{l+s}{\PYGZdq{}Correct Combination}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s}{\PYGZdq{}}\PYG{p}{;}
+  \PYG{n}{send\PYGZus{}bytes}\PYG{p}{(}\PYG{n}{cc\PYGZus{}message}\PYG{p}{,} \PYG{l+m+mi}{20}\PYG{p}{);}
+  \PYG{c+c1}{// correct key combination test}
+  \PYG{n}{Key} \PYG{n}{correctCombination}\PYG{p}{[}\PYG{l+m+mi}{4}\PYG{p}{]} \PYG{o}{=} \PYG{p}{\PYGZob{}}\PYG{n}{KEY\PYGZus{}0}\PYG{p}{,} \PYG{n}{KEY\PYGZus{}1}\PYG{p}{,} \PYG{n}{KEY\PYGZus{}3}\PYG{p}{,} \PYG{n}{KEY\PYGZus{}4}\PYG{p}{\PYGZcb{};}
+  \PYG{n}{handle\PYGZus{}combiation}\PYG{p}{(}\PYG{n}{correctCombination}\PYG{p}{);}
+  \PYG{n}{\PYGZus{}\PYGZus{}delay\PYGZus{}cycles}\PYG{p}{(}\PYG{l+m+mi}{1000000}\PYG{p}{);}
+  \PYG{n}{send\PYGZus{}bytes}\PYG{p}{(}\PYG{n}{lock\PYGZus{}message}\PYG{p}{,} \PYG{l+m+mi}{5}\PYG{p}{);}
+  \PYG{n}{lock}\PYG{p}{();}
+
+  \PYG{n}{\PYGZus{}\PYGZus{}delay\PYGZus{}cycles}\PYG{p}{(}\PYG{l+m+mi}{1000000}\PYG{p}{);}
+
+  \PYG{k+kt}{char} \PYG{n}{bc\PYGZus{}message}\PYG{p}{[}\PYG{l+m+mi}{17}\PYG{p}{]} \PYG{o}{=} \PYG{l+s}{\PYGZdq{}Bad Combination}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s}{\PYGZdq{}}\PYG{p}{;}
+  \PYG{n}{send\PYGZus{}bytes}\PYG{p}{(}\PYG{n}{bc\PYGZus{}message}\PYG{p}{,} \PYG{l+m+mi}{17}\PYG{p}{);}
+  \PYG{c+c1}{// bad key combination test}
+  \PYG{n}{Key} \PYG{n}{badCombination}\PYG{p}{[}\PYG{l+m+mi}{17}\PYG{p}{]} \PYG{o}{=} \PYG{p}{\PYGZob{}}\PYG{n}{KEY\PYGZus{}5}\PYG{p}{,} \PYG{n}{KEY\PYGZus{}3}\PYG{p}{,} \PYG{n}{KEY\PYGZus{}2}\PYG{p}{,} \PYG{n}{KEY\PYGZus{}0}\PYG{p}{\PYGZcb{};}
+  \PYG{n}{handle\PYGZus{}combiation}\PYG{p}{(}\PYG{n}{badCombination}\PYG{p}{);}
+
+  \PYG{n}{\PYGZus{}\PYGZus{}delay\PYGZus{}cycles}\PYG{p}{(}\PYG{l+m+mi}{10000000}\PYG{p}{);}
+  \PYG{n}{send\PYGZus{}bytes}\PYG{p}{(}\PYG{n}{lock\PYGZus{}message}\PYG{p}{,} \PYG{l+m+mi}{5}\PYG{p}{);}
+  \PYG{n}{lock}\PYG{p}{();}
+
+  \PYG{k+kt}{char} \PYG{n}{nc\PYGZus{}message}\PYG{p}{[}\PYG{l+m+mi}{17}\PYG{p}{]} \PYG{o}{=} \PYG{l+s}{\PYGZdq{}New Combination}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s}{\PYGZdq{}}\PYG{p}{;}
+  \PYG{n}{send\PYGZus{}bytes}\PYG{p}{(}\PYG{n}{nc\PYGZus{}message}\PYG{p}{,} \PYG{l+m+mi}{17}\PYG{p}{);}
+  \PYG{c+c1}{// passcode set test}
+  \PYG{n}{Key} \PYG{n}{newCombination}\PYG{p}{[}\PYG{l+m+mi}{4}\PYG{p}{]} \PYG{o}{=} \PYG{p}{\PYGZob{}}\PYG{n}{KEY\PYGZus{}7}\PYG{p}{,} \PYG{n}{KEY\PYGZus{}8}\PYG{p}{,} \PYG{n}{KEY\PYGZus{}9}\PYG{p}{,} \PYG{n}{KEY\PYGZus{}1}\PYG{p}{\PYGZcb{};}
+  \PYG{n}{set\PYGZus{}passcode}\PYG{p}{(}\PYG{n}{newCombination}\PYG{p}{);}
+  \PYG{n}{correctCombination}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]} \PYG{o}{=} \PYG{n}{KEY\PYGZus{}7}\PYG{p}{;}
+  \PYG{n}{correctCombination}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{]} \PYG{o}{=} \PYG{n}{KEY\PYGZus{}8}\PYG{p}{;}
+  \PYG{n}{correctCombination}\PYG{p}{[}\PYG{l+m+mi}{2}\PYG{p}{]} \PYG{o}{=} \PYG{n}{KEY\PYGZus{}9}\PYG{p}{;}
+  \PYG{n}{correctCombination}\PYG{p}{[}\PYG{l+m+mi}{3}\PYG{p}{]} \PYG{o}{=} \PYG{n}{KEY\PYGZus{}1}\PYG{p}{;}
+  \PYG{n}{send\PYGZus{}bytes}\PYG{p}{(}\PYG{n}{cc\PYGZus{}message}\PYG{p}{,} \PYG{l+m+mi}{20}\PYG{p}{);}
+  \PYG{n}{handle\PYGZus{}combiation}\PYG{p}{(}\PYG{n}{correctCombination}\PYG{p}{);}
+  \PYG{n}{send\PYGZus{}bytes}\PYG{p}{(}\PYG{n}{cc\PYGZus{}message}\PYG{p}{,} \PYG{l+m+mi}{20}\PYG{p}{);}
+  \PYG{n}{\PYGZus{}\PYGZus{}delay\PYGZus{}cycles}\PYG{p}{(}\PYG{l+m+mi}{10000000}\PYG{p}{);}
+  \PYG{n}{lock}\PYG{p}{();}
+
+  \PYG{k+kt}{uint8\PYGZus{}t} \PYG{n}{end\PYGZus{}message}\PYG{p}{[}\PYG{l+m+mi}{21}\PYG{p}{]} \PYG{o}{=} \PYG{l+s}{\PYGZdq{}End of Security Test}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s}{\PYGZdq{}}\PYG{p}{;}
+  \PYG{n}{send\PYGZus{}bytes}\PYG{p}{(}\PYG{n}{end\PYGZus{}message}\PYG{p}{,} \PYG{l+m+mi}{21}\PYG{p}{);}
+
+\PYG{p}{\PYGZcb{}}
+\end{Verbatim}

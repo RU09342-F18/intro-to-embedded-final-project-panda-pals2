@@ -1,0 +1,46 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{c+cm}{/**}
+\PYG{c+cm}{ * @file timer\PYGZus{}test.c}
+\PYG{c+cm}{ * @author John McAvoy}
+\PYG{c+cm}{ * @date 11 Dec 2018}
+\PYG{c+cm}{ * @desc test program for timeout\PYGZus{}timer}
+\PYG{c+cm}{ */}
+
+\PYG{c+cp}{\PYGZsh{}include} \PYG{c+cpf}{\PYGZlt{}msp430.h\PYGZgt{}}
+\PYG{c+cp}{\PYGZsh{}include} \PYG{c+cpf}{\PYGZlt{}stdio.h\PYGZgt{}}
+\PYG{c+cp}{\PYGZsh{}include} \PYG{c+cpf}{\PYGZdq{}../../lib/security.h\PYGZdq{}}
+\PYG{c+cp}{\PYGZsh{}include} \PYG{c+cpf}{\PYGZdq{}../../lib/uart.h\PYGZdq{}}
+
+\PYG{k+kt}{int} \PYG{n+nf}{main}\PYG{p}{(}\PYG{k+kt}{void}\PYG{p}{)}
+\PYG{p}{\PYGZob{}}
+  \PYG{n}{WDTCTL} \PYG{o}{=} \PYG{n}{WDTPW} \PYG{o}{+} \PYG{n}{WDTHOLD}\PYG{p}{;}                 \PYG{c+c1}{// Stop watchdog timer}
+  \PYG{n}{setup\PYGZus{}uart}\PYG{p}{();}
+  \PYG{n}{setup\PYGZus{}lock\PYGZus{}pins}\PYG{p}{();}
+  \PYG{n}{setup\PYGZus{}timeout\PYGZus{}timer}\PYG{p}{();}
+
+  \PYG{k+kt}{char} \PYG{n}{start\PYGZus{}message}\PYG{p}{[}\PYG{l+m+mi}{12}\PYG{p}{]} \PYG{o}{=} \PYG{l+s}{\PYGZdq{}Timer Test}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s}{\PYGZdq{}}\PYG{p}{;}
+  \PYG{n}{send\PYGZus{}bytes}\PYG{p}{(}\PYG{n}{start\PYGZus{}message}\PYG{p}{,} \PYG{l+m+mi}{12}\PYG{p}{);}
+
+  \PYG{n}{start\PYGZus{}timeout\PYGZus{}timer}\PYG{p}{();}
+
+  \PYG{c+c1}{//\PYGZus{}\PYGZus{}no\PYGZus{}operation();}
+  \PYG{k}{while}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{)\PYGZob{}}
+      \PYG{n}{\PYGZus{}\PYGZus{}bis\PYGZus{}SR\PYGZus{}register}\PYG{p}{(}\PYG{n}{GIE}\PYG{p}{);}       \PYG{c+c1}{// enable interrupts}
+  \PYG{p}{\PYGZcb{}}
+
+\PYG{p}{\PYGZcb{}}
+
+\PYG{c+c1}{// Timer A0 interrupt service routine}
+\PYG{c+cp}{\PYGZsh{}if defined(\PYGZus{}\PYGZus{}TI\PYGZus{}COMPILER\PYGZus{}VERSION\PYGZus{}\PYGZus{}) || defined(\PYGZus{}\PYGZus{}IAR\PYGZus{}SYSTEMS\PYGZus{}ICC\PYGZus{}\PYGZus{})}
+\PYG{c+cp}{\PYGZsh{}pragma vector=TIMER0\PYGZus{}A0\PYGZus{}VECTOR}
+\PYG{n}{\PYGZus{}\PYGZus{}interrupt} \PYG{k+kt}{void} \PYG{n+nf}{Timer\PYGZus{}A} \PYG{p}{(}\PYG{k+kt}{void}\PYG{p}{)}
+\PYG{c+cp}{\PYGZsh{}elif defined(\PYGZus{}\PYGZus{}GNUC\PYGZus{}\PYGZus{})}
+\PYG{k+kt}{void} \PYG{n}{\PYGZus{}\PYGZus{}attribute\PYGZus{}\PYGZus{}} \PYG{p}{((}\PYG{n}{interrupt}\PYG{p}{(}\PYG{n}{TIMER0\PYGZus{}A0\PYGZus{}VECTOR}\PYG{p}{)))} \PYG{n}{Timer\PYGZus{}A} \PYG{p}{(}\PYG{k+kt}{void}\PYG{p}{)}
+\PYG{c+cp}{\PYGZsh{}else}
+\PYG{c+cp}{\PYGZsh{}error Compiler not supported!}
+\PYG{c+cp}{\PYGZsh{}endif}
+\PYG{p}{\PYGZob{}}
+    \PYG{k+kt}{char} \PYG{n}{message}\PYG{p}{[}\PYG{l+m+mi}{13}\PYG{p}{]} \PYG{o}{=} \PYG{l+s}{\PYGZdq{}Timer Reached\PYGZdq{}}\PYG{p}{;}
+    \PYG{n}{send\PYGZus{}bytes}\PYG{p}{(}\PYG{n}{message}\PYG{p}{,} \PYG{l+m+mi}{13}\PYG{p}{);}
+\PYG{p}{\PYGZcb{}}
+\end{Verbatim}

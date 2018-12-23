@@ -1,0 +1,15 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{c+c1}{// uart.h}
+
+\PYG{c+cp}{\PYGZsh{}ifndef UART\PYGZus{}H}
+\PYG{c+cp}{\PYGZsh{}define UART\PYGZus{}H}
+
+\PYG{c+cp}{\PYGZsh{}include} \PYG{c+cpf}{\PYGZlt{}msp430.h\PYGZgt{}}
+\PYG{c+cp}{\PYGZsh{}include} \PYG{c+cpf}{\PYGZlt{}stdint.h\PYGZgt{}}
+
+\PYG{k+kt}{void} \PYG{n+nf}{setup\PYGZus{}uart}\PYG{p}{();}
+
+\PYG{k+kt}{void} \PYG{n+nf}{send\PYGZus{}bytes}\PYG{p}{(}\PYG{k+kt}{char} \PYG{o}{*}\PYG{n}{bytes}\PYG{p}{,} \PYG{k+kt}{uint8\PYGZus{}t} \PYG{n}{length}\PYG{p}{);}
+
+\PYG{c+cp}{\PYGZsh{}endif }\PYG{c+c1}{// UART\PYGZus{}H}
+\end{Verbatim}

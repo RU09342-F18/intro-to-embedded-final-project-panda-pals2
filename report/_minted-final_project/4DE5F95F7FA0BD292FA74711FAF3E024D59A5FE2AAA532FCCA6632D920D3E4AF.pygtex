@@ -1,0 +1,115 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{c+cm}{/**}
+\PYG{c+cm}{ * @file security.c}
+\PYG{c+cm}{ * @author John McAvoy}
+\PYG{c+cm}{ * @date 11 Dec 2018}
+\PYG{c+cm}{ * @desc provides security function logic for keylock}
+\PYG{c+cm}{ */}
+
+\PYG{c+cp}{\PYGZsh{}define DEBUG 1}
+\PYG{c+cp}{\PYGZsh{}ifdef DEBUG}
+\PYG{c+cp}{\PYGZsh{}include}    \PYG{c+cpf}{\PYGZlt{}stdio.h\PYGZgt{}}
+\PYG{c+cp}{\PYGZsh{}include}    \PYG{c+cpf}{\PYGZdq{}uart.h\PYGZdq{}}
+\PYG{c+cp}{\PYGZsh{}endif}
+
+\PYG{c+cp}{\PYGZsh{}include} \PYG{c+cpf}{\PYGZdq{}security.h\PYGZdq{}}
+\PYG{c+cp}{\PYGZsh{}include} \PYG{c+cpf}{\PYGZdq{}Key.h\PYGZdq{}}
+
+
+\PYG{n}{Key} \PYG{n}{passcode}\PYG{p}{[}\PYG{n}{PASSCODE\PYGZus{}LENGTH}\PYG{p}{]} \PYG{o}{=} \PYG{p}{\PYGZob{}} \PYG{n}{KEY\PYGZus{}1}\PYG{p}{,} \PYG{n}{KEY\PYGZus{}2}\PYG{p}{,} \PYG{n}{KEY\PYGZus{}3}\PYG{p}{,} \PYG{n}{KEY\PYGZus{}4} \PYG{p}{\PYGZcb{};} \PYG{c+c1}{// initial passcode: 1\PYGZhy{}2\PYGZhy{}3\PYGZhy{}4}
+\PYG{n}{Key} \PYG{n}{input\PYGZus{}buffer}\PYG{p}{[}\PYG{n}{PASSCODE\PYGZus{}LENGTH}\PYG{p}{]} \PYG{o}{=} \PYG{p}{\PYGZob{}} \PYG{n}{KEY\PYGZus{}ERR}\PYG{p}{,} \PYG{n}{KEY\PYGZus{}ERR}\PYG{p}{,} \PYG{n}{KEY\PYGZus{}ERR}\PYG{p}{,} \PYG{n}{KEY\PYGZus{}ERR} \PYG{p}{\PYGZcb{};} \PYG{c+c1}{// holds input keys}
+
+\PYG{k+kt}{uint8\PYGZus{}t} \PYG{n}{input\PYGZus{}counter} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;} \PYG{c+c1}{// tracks input count}
+
+\PYG{c+cm}{/**}
+\PYG{c+cm}{ * @func setup\PYGZus{}lock\PYGZus{}pins}
+\PYG{c+cm}{ * @desc initializes I/O pins for handling the lock/unlock}
+\PYG{c+cm}{ */}
+\PYG{k+kt}{void} \PYG{n+nf}{setup\PYGZus{}lock\PYGZus{}pins}\PYG{p}{()} \PYG{p}{\PYGZob{}}
+
+    \PYG{c+c1}{// configure pins to I/O mode}
+    \PYG{n}{P2SEL} \PYG{o}{\PYGZam{}=} \PYG{o}{\PYGZti{}}\PYG{p}{(}\PYG{n}{LOCKED} \PYG{o}{+} \PYG{n}{UNLOCKED}\PYG{p}{);}
+    \PYG{n}{P2SEL2} \PYG{o}{\PYGZam{}=} \PYG{o}{\PYGZti{}}\PYG{p}{(}\PYG{n}{LOCKED} \PYG{o}{+} \PYG{n}{UNLOCKED}\PYG{p}{);}
+
+    \PYG{c+c1}{// configure pins to outputs}
+    \PYG{n}{P2DIR} \PYG{o}{|=} \PYG{n}{LOCKED} \PYG{o}{+} \PYG{n}{UNLOCKED}\PYG{p}{;}
+
+    \PYG{n}{lock}\PYG{p}{();}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{c+cm}{/**}
+\PYG{c+cm}{ * @func setup\PYGZus{}timeout\PYGZus{}timer}
+\PYG{c+cm}{ * @desc initializes the timeout timer}
+\PYG{c+cm}{ */}
+\PYG{k+kt}{void} \PYG{n+nf}{setup\PYGZus{}timeout\PYGZus{}timer}\PYG{p}{()} \PYG{p}{\PYGZob{}}
+    \PYG{n}{CCTL0} \PYG{o}{=} \PYG{n}{CCIE}\PYG{p}{;}
+    \PYG{n}{TACTL} \PYG{o}{=} \PYG{n}{TASSEL\PYGZus{}2} \PYG{o}{+} \PYG{n}{MC\PYGZus{}1} \PYG{o}{+} \PYG{n}{TACLR}\PYG{p}{;}    \PYG{c+c1}{//ACLK, up mode, clear}
+    \PYG{n}{CCR0} \PYG{o}{=} \PYG{l+m+mi}{3200}\PYG{p}{;}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{c+cm}{/**}
+\PYG{c+cm}{ * @func setup\PYGZus{}timeout\PYGZus{}timer}
+\PYG{c+cm}{ * @desc sets the new passcod* @param new\PYGZus{}passcode \PYGZhy{} Key array of new passcode sequence}
+\PYG{c+cm}{ */}
+\PYG{k+kt}{void} \PYG{n+nf}{set\PYGZus{}passcode}\PYG{p}{(}\PYG{n}{Key} \PYG{n}{new\PYGZus{}passcode}\PYG{p}{[])} \PYG{p}{\PYGZob{}}
+    \PYG{k}{for}\PYG{p}{(}\PYG{k+kt}{uint8\PYGZus{}t} \PYG{n}{i} \PYG{o}{=} \PYG{l+m+mi}{0} \PYG{p}{;} \PYG{n}{i} \PYG{o}{\PYGZlt{}} \PYG{n}{PASSCODE\PYGZus{}LENGTH}\PYG{p}{;} \PYG{n}{i}\PYG{o}{++}\PYG{p}{)} \PYG{p}{\PYGZob{}}
+        \PYG{n}{passcode}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]} \PYG{o}{=} \PYG{n}{new\PYGZus{}passcode}\PYG{p}{[}\PYG{n}{i}\PYG{p}{];}
+    \PYG{p}{\PYGZcb{}}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{c+cm}{/**}
+\PYG{c+cm}{ * @func lock}
+\PYG{c+cm}{ * @desc sets the state to locked}
+\PYG{c+cm}{ */}
+\PYG{k+kt}{void} \PYG{n+nf}{lock}\PYG{p}{()} \PYG{p}{\PYGZob{}}
+    \PYG{n}{P2OUT} \PYG{o}{\PYGZam{}=} \PYG{o}{\PYGZti{}}\PYG{n}{UNLOCKED}\PYG{p}{;}
+    \PYG{n}{P2OUT} \PYG{o}{|=} \PYG{n}{LOCKED}\PYG{p}{;}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{c+cm}{/**}
+\PYG{c+cm}{ * @func lock}
+\PYG{c+cm}{ * @desc sets the state to unlocked}
+\PYG{c+cm}{ */}
+\PYG{k+kt}{void} \PYG{n+nf}{unlock}\PYG{p}{()} \PYG{p}{\PYGZob{}}
+    \PYG{n}{P2OUT} \PYG{o}{\PYGZam{}=} \PYG{o}{\PYGZti{}}\PYG{n}{LOCKED}\PYG{p}{;}
+    \PYG{n}{P2OUT} \PYG{o}{|=} \PYG{n}{UNLOCKED}\PYG{p}{;}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{c+cm}{/**}
+\PYG{c+cm}{ * @func start\PYGZus{}timeout\PYGZus{}timer}
+\PYG{c+cm}{ * @desc starts the timeout timer}
+\PYG{c+cm}{ */}
+\PYG{k+kt}{void} \PYG{n+nf}{start\PYGZus{}timeout\PYGZus{}timer}\PYG{p}{()} \PYG{p}{\PYGZob{}}
+    \PYG{n}{TA0CTL} \PYG{o}{=} \PYG{n}{MC\PYGZus{}2}\PYG{p}{;} \PYG{c+c1}{// continuous mode}
+    \PYG{n}{P2OUT} \PYG{o}{|=} \PYG{n}{TIMEOUT}\PYG{p}{;} \PYG{c+c1}{// turn on timeout LED}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{c+cm}{/**}
+\PYG{c+cm}{ * @func stop\PYGZus{}timeout\PYGZus{}timer}
+\PYG{c+cm}{ * @desc stops the timeout timer}
+\PYG{c+cm}{ */}
+\PYG{k+kt}{void} \PYG{n+nf}{stop\PYGZus{}timeout\PYGZus{}timer}\PYG{p}{()} \PYG{p}{\PYGZob{}}
+    \PYG{n}{TA0CTL} \PYG{o}{=} \PYG{n}{MC\PYGZus{}0}\PYG{p}{;} \PYG{c+c1}{// halt}
+    \PYG{n}{TAR} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;} \PYG{c+c1}{// clear timer}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{c+cm}{/**}
+\PYG{c+cm}{ * @func handle\PYGZus{}combiation}
+\PYG{c+cm}{ * @desc takes in the entered combination and handles appropriate response}
+\PYG{c+cm}{ * @param combination \PYGZhy{} Key array of the entered combination}
+\PYG{c+cm}{ */}
+\PYG{k+kt}{void} \PYG{n+nf}{handle\PYGZus{}combiation}\PYG{p}{(}\PYG{n}{Key} \PYG{n}{combination}\PYG{p}{[])} \PYG{p}{\PYGZob{}}
+    \PYG{k+kt}{uint8\PYGZus{}t} \PYG{n}{passcode\PYGZus{}entered} \PYG{o}{=} \PYG{l+m+mi}{1}\PYG{p}{;} \PYG{c+c1}{// true}
+    \PYG{k}{for}\PYG{p}{(}\PYG{k+kt}{uint8\PYGZus{}t} \PYG{n}{i} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;} \PYG{n}{i} \PYG{o}{\PYGZlt{}} \PYG{n}{PASSCODE\PYGZus{}LENGTH}\PYG{p}{;} \PYG{n}{i}\PYG{o}{++}\PYG{p}{)} \PYG{p}{\PYGZob{}}
+        \PYG{k}{if}\PYG{p}{(}\PYG{n}{combination}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]} \PYG{o}{!=} \PYG{n}{passcode}\PYG{p}{[}\PYG{n}{i}\PYG{p}{])}
+            \PYG{n}{passcode\PYGZus{}entered} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;} \PYG{c+c1}{// false}
+    \PYG{p}{\PYGZcb{}}
+
+    \PYG{k}{if}\PYG{p}{(}\PYG{n}{passcode\PYGZus{}entered}\PYG{p}{)}
+        \PYG{n}{unlock}\PYG{p}{();}
+    \PYG{k}{else}
+        \PYG{n}{lock}\PYG{p}{();}
+
+    \PYG{n}{start\PYGZus{}timeout\PYGZus{}timer}\PYG{p}{();}
+\PYG{p}{\PYGZcb{}}
+\end{Verbatim}

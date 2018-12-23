@@ -1,0 +1,28 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{c+cm}{/**}
+\PYG{c+cm}{ * @file key.h}
+\PYG{c+cm}{ * @author John McAvoy}
+\PYG{c+cm}{ * @date 11 Dec 2018}
+\PYG{c+cm}{ * @desc provides Key enum typdef}
+\PYG{c+cm}{ */}
+\PYG{c+cp}{\PYGZsh{}ifndef KEY\PYGZus{}H}
+\PYG{c+cp}{\PYGZsh{}define KEY\PYGZus{}H}
+
+\PYG{k}{typedef} \PYG{k}{enum} \PYG{n}{Key} \PYG{p}{\PYGZob{}}
+    \PYG{n}{KEY\PYGZus{}0}\PYG{p}{,}
+    \PYG{n}{KEY\PYGZus{}1}\PYG{p}{,}
+    \PYG{n}{KEY\PYGZus{}2}\PYG{p}{,}
+    \PYG{n}{KEY\PYGZus{}3}\PYG{p}{,}
+    \PYG{n}{KEY\PYGZus{}4}\PYG{p}{,}
+    \PYG{n}{KEY\PYGZus{}5}\PYG{p}{,}
+    \PYG{n}{KEY\PYGZus{}6}\PYG{p}{,}
+    \PYG{n}{KEY\PYGZus{}7}\PYG{p}{,}
+    \PYG{n}{KEY\PYGZus{}8}\PYG{p}{,}
+    \PYG{n}{KEY\PYGZus{}9}\PYG{p}{,}
+    \PYG{n}{KEY\PYGZus{}ERR}
+\PYG{p}{\PYGZcb{}} \PYG{n}{Key}\PYG{p}{;}
+
+\PYG{k+kt}{char} \PYG{n+nf}{key2Char}\PYG{p}{(}\PYG{n}{Key} \PYG{n}{k}\PYG{p}{);}
+
+\PYG{c+cp}{\PYGZsh{}endif }\PYG{c+c1}{// KEY\PYGZus{}H}
+\end{Verbatim}

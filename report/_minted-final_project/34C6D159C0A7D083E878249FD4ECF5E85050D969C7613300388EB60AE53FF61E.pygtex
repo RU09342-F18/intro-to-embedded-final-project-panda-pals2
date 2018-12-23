@@ -1,0 +1,40 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{c+cm}{/**}
+\PYG{c+cm}{ * @file msp430g2553\PYGZus{}keypad\PYGZus{}lock.c}
+\PYG{c+cm}{ * @author John McAvoy}
+\PYG{c+cm}{ * @date 11 Dec 2018}
+\PYG{c+cm}{ * @desc test program for uart.c}
+\PYG{c+cm}{ */}
+
+\PYG{c+cp}{\PYGZsh{}include} \PYG{c+cpf}{\PYGZlt{}msp430.h\PYGZgt{}}
+\PYG{c+cp}{\PYGZsh{}include} \PYG{c+cpf}{\PYGZlt{}stdio.h\PYGZgt{}}
+\PYG{c+cp}{\PYGZsh{}include} \PYG{c+cpf}{\PYGZdq{}../../lib/uart.h\PYGZdq{}}
+
+\PYG{k+kt}{int} \PYG{n+nf}{main}\PYG{p}{(}\PYG{k+kt}{void}\PYG{p}{)}
+\PYG{p}{\PYGZob{}}
+  \PYG{n}{WDTCTL} \PYG{o}{=} \PYG{n}{WDTPW} \PYG{o}{+} \PYG{n}{WDTHOLD}\PYG{p}{;}                 \PYG{c+c1}{// Stop watchdog timer}
+  \PYG{n}{setup\PYGZus{}uart}\PYG{p}{();}
+
+  \PYG{k}{const} \PYG{k+kt}{char} \PYG{n}{test\PYGZus{}message}\PYG{p}{[}\PYG{l+m+mi}{16}\PYG{p}{]} \PYG{o}{=} \PYG{l+s}{\PYGZdq{}UART Testbench\PYGZdq{}}\PYG{p}{;}
+  \PYG{n}{send\PYGZus{}bytes}\PYG{p}{(}\PYG{n}{test\PYGZus{}message}\PYG{p}{,} \PYG{l+m+mi}{16}\PYG{p}{);}
+
+  \PYG{n}{\PYGZus{}\PYGZus{}bis\PYGZus{}SR\PYGZus{}register}\PYG{p}{(}\PYG{n}{GIE}\PYG{p}{);}
+
+  \PYG{k}{while}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{)} \PYG{n}{\PYGZus{}\PYGZus{}no\PYGZus{}operation}\PYG{p}{();}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{c+cp}{\PYGZsh{}if defined(\PYGZus{}\PYGZus{}TI\PYGZus{}COMPILER\PYGZus{}VERSION\PYGZus{}\PYGZus{}) || defined(\PYGZus{}\PYGZus{}IAR\PYGZus{}SYSTEMS\PYGZus{}ICC\PYGZus{}\PYGZus{})}
+\PYG{c+cp}{\PYGZsh{}pragma vector=USCIAB0RX\PYGZus{}VECTOR}
+\PYG{n}{\PYGZus{}\PYGZus{}interrupt} \PYG{k+kt}{void} \PYG{n+nf}{USCI0RX\PYGZus{}ISR}\PYG{p}{(}\PYG{k+kt}{void}\PYG{p}{)}
+\PYG{c+cp}{\PYGZsh{}elif defined(\PYGZus{}\PYGZus{}GNUC\PYGZus{}\PYGZus{})}
+\PYG{k+kt}{void} \PYG{n}{\PYGZus{}\PYGZus{}attribute\PYGZus{}\PYGZus{}} \PYG{p}{((}\PYG{n}{interrupt}\PYG{p}{(}\PYG{n}{USCIAB0RX\PYGZus{}VECTOR}\PYG{p}{)))} \PYG{n}{USCI0RX\PYGZus{}ISR} \PYG{p}{(}\PYG{k+kt}{void}\PYG{p}{)}
+\PYG{c+cp}{\PYGZsh{}else}
+\PYG{c+cp}{\PYGZsh{}error Compiler not supported!}
+\PYG{c+cp}{\PYGZsh{}endif}
+\PYG{p}{\PYGZob{}}
+    \PYG{k+kt}{unsigned} \PYG{k+kt}{char} \PYG{n}{data} \PYG{o}{=} \PYG{n}{UCA0RXBUF}\PYG{p}{;}
+    \PYG{k+kt}{unsigned} \PYG{k+kt}{char} \PYG{n}{out\PYGZus{}message}\PYG{p}{[}\PYG{l+m+mi}{15}\PYG{p}{];}
+    \PYG{n}{sprintf}\PYG{p}{(}\PYG{n}{out\PYGZus{}message}\PYG{p}{,} \PYG{l+s}{\PYGZdq{}\PYGZsq{}\PYGZpc{}2x\PYGZsq{} Received}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s}{\PYGZdq{}}\PYG{p}{,} \PYG{n}{data}\PYG{p}{);}
+    \PYG{n}{send\PYGZus{}bytes}\PYG{p}{(}\PYG{n}{out\PYGZus{}message}\PYG{p}{,} \PYG{l+m+mi}{15}\PYG{p}{);}
+\PYG{p}{\PYGZcb{}}
+\end{Verbatim}

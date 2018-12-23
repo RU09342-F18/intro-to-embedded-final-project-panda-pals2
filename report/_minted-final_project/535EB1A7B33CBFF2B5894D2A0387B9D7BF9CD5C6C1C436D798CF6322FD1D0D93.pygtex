@@ -1,0 +1,72 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{c+cm}{/**}
+\PYG{c+cm}{ * @file security.h}
+\PYG{c+cm}{ * @author John McAvoy}
+\PYG{c+cm}{ * @date 11 Dec 2018}
+\PYG{c+cm}{ * @desc provides security function logic for keylock}
+\PYG{c+cm}{ */}
+
+\PYG{c+cp}{\PYGZsh{}ifndef SECURITY\PYGZus{}H}
+\PYG{c+cp}{\PYGZsh{}define SECURITY\PYGZus{}H}
+
+\PYG{c+cp}{\PYGZsh{}include} \PYG{c+cpf}{\PYGZlt{}msp430.h\PYGZgt{}}
+\PYG{c+cp}{\PYGZsh{}include} \PYG{c+cpf}{\PYGZlt{}stdint.h\PYGZgt{}}
+\PYG{c+cp}{\PYGZsh{}include} \PYG{c+cpf}{\PYGZdq{}Key.h\PYGZdq{}}
+
+\PYG{c+cp}{\PYGZsh{}define UNLOCKED ( 1 \PYGZlt{}\PYGZlt{} 3 ) }\PYG{c+c1}{// P2.3}
+\PYG{c+cp}{\PYGZsh{}define TIMEOUT  ( 1 \PYGZlt{}\PYGZlt{} 4 ) }\PYG{c+c1}{// P2.1}
+\PYG{c+cp}{\PYGZsh{}define LOCKED   ( 1 \PYGZlt{}\PYGZlt{} 5 ) }\PYG{c+c1}{// P2.5}
+\PYG{c+cp}{\PYGZsh{}define PASSCODE\PYGZus{}LENGTH 4}
+
+\PYG{c+cm}{/**}
+\PYG{c+cm}{ * @func setup\PYGZus{}lock\PYGZus{}pins}
+\PYG{c+cm}{ * @desc initializes I/O pins for handling the lock/unlock}
+\PYG{c+cm}{ */}
+\PYG{k+kt}{void} \PYG{n+nf}{setup\PYGZus{}lock\PYGZus{}pins}\PYG{p}{();}
+
+\PYG{c+cm}{/**}
+\PYG{c+cm}{ * @func setup\PYGZus{}timeout\PYGZus{}timer}
+\PYG{c+cm}{ * @desc initializes the 3s timeout timer}
+\PYG{c+cm}{ */}
+\PYG{k+kt}{void} \PYG{n+nf}{setup\PYGZus{}timeout\PYGZus{}timer}\PYG{p}{();}
+
+\PYG{c+cm}{/**}
+\PYG{c+cm}{ * @func setup\PYGZus{}timeout\PYGZus{}timer}
+\PYG{c+cm}{ * @desc sets the new passcode}
+\PYG{c+cm}{ * @param new\PYGZus{}passcode \PYGZhy{} Key array of new passcode sequence}
+\PYG{c+cm}{ */}
+\PYG{k+kt}{void} \PYG{n+nf}{set\PYGZus{}passcode}\PYG{p}{(}\PYG{n}{Key} \PYG{n}{new\PYGZus{}passcode}\PYG{p}{[]);}
+
+\PYG{c+cm}{/**}
+\PYG{c+cm}{ * @func lock}
+\PYG{c+cm}{ * @desc sets the state to locked}
+\PYG{c+cm}{ */}
+\PYG{k+kt}{void} \PYG{n+nf}{lock}\PYG{p}{();}
+
+\PYG{c+cm}{/**}
+\PYG{c+cm}{ * @func lock}
+\PYG{c+cm}{ * @desc sets the state to unlocked}
+\PYG{c+cm}{ */}
+\PYG{k+kt}{void} \PYG{n+nf}{unlock}\PYG{p}{();}
+
+\PYG{c+cm}{/**}
+\PYG{c+cm}{ * @func start\PYGZus{}timeout\PYGZus{}timer}
+\PYG{c+cm}{ * @desc starts the timeout timer}
+\PYG{c+cm}{ */}
+\PYG{k+kt}{void} \PYG{n+nf}{start\PYGZus{}timeout\PYGZus{}timer}\PYG{p}{();}
+
+\PYG{c+cm}{/**}
+\PYG{c+cm}{ * @func stop\PYGZus{}timeout\PYGZus{}timer}
+\PYG{c+cm}{ * @desc stops the timeout timer}
+\PYG{c+cm}{ */}
+\PYG{k+kt}{void} \PYG{n+nf}{stop\PYGZus{}timeout\PYGZus{}timer}\PYG{p}{();}
+
+\PYG{c+cm}{/**}
+\PYG{c+cm}{ * @func handle\PYGZus{}combiation}
+\PYG{c+cm}{ * @desc takes in the entered combination and handles appropriate response}
+\PYG{c+cm}{ * @param combination \PYGZhy{} Key array of the entered combination}
+\PYG{c+cm}{ */}
+\PYG{k+kt}{void} \PYG{n+nf}{handle\PYGZus{}combiation}\PYG{p}{(}\PYG{n}{Key} \PYG{n}{combination}\PYG{p}{[]);}
+
+\PYG{c+cp}{\PYGZsh{}endif }\PYG{c+c1}{// SECURITY\PYGZus{}H}
+\end{Verbatim}

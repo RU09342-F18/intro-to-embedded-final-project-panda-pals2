@@ -1,0 +1,34 @@
+\BOOKMARK [1][-]{section.1}{Project Description}{}% 1
+\BOOKMARK [1][-]{section.2}{Final Code}{}% 2
+\BOOKMARK [2][-]{subsection.2.1}{src/msp430g2553\137keypad\137lock.c}{section.2}% 3
+\BOOKMARK [3][-]{subsubsection.2.1.1}{main}{subsection.2.1}% 4
+\BOOKMARK [3][-]{subsubsection.2.1.2}{Timer0\137A1}{subsection.2.1}% 5
+\BOOKMARK [3][-]{subsubsection.2.1.3}{USCI0RX\137ISR}{subsection.2.1}% 6
+\BOOKMARK [3][-]{subsubsection.2.1.4}{Port\1371}{subsection.2.1}% 7
+\BOOKMARK [3][-]{subsubsection.2.1.5}{Port\1372}{subsection.2.1}% 8
+\BOOKMARK [2][-]{subsection.2.2}{lib/uart.c}{section.2}% 9
+\BOOKMARK [3][-]{subsubsection.2.2.1}{setup\137uart}{subsection.2.2}% 10
+\BOOKMARK [3][-]{subsubsection.2.2.2}{send\137bytes}{subsection.2.2}% 11
+\BOOKMARK [2][-]{subsection.2.3}{lib/security.c}{section.2}% 12
+\BOOKMARK [3][-]{subsubsection.2.3.1}{setup\137lock\137pins}{subsection.2.3}% 13
+\BOOKMARK [3][-]{subsubsection.2.3.2}{setup\137timeout\137timer}{subsection.2.3}% 14
+\BOOKMARK [3][-]{subsubsection.2.3.3}{set\137passcode}{subsection.2.3}% 15
+\BOOKMARK [3][-]{subsubsection.2.3.4}{lock}{subsection.2.3}% 16
+\BOOKMARK [3][-]{subsubsection.2.3.5}{unlock}{subsection.2.3}% 17
+\BOOKMARK [3][-]{subsubsection.2.3.6}{start\137timeout\137timer}{subsection.2.3}% 18
+\BOOKMARK [3][-]{subsubsection.2.3.7}{stop\137timeout\137timer}{subsection.2.3}% 19
+\BOOKMARK [3][-]{subsubsection.2.3.8}{handle\137combination}{subsection.2.3}% 20
+\BOOKMARK [2][-]{subsection.2.4}{lib/keypad.c}{section.2}% 21
+\BOOKMARK [3][-]{subsubsection.2.4.1}{setup\137keypad\137pins}{subsection.2.4}% 22
+\BOOKMARK [3][-]{subsubsection.2.4.2}{clear\137key\137interrupt\137flags}{subsection.2.4}% 23
+\BOOKMARK [3][-]{subsubsection.2.4.3}{get\137key\137pressed}{subsection.2.4}% 24
+\BOOKMARK [3][-]{subsubsection.2.4.4}{handle\137key\137press}{subsection.2.4}% 25
+\BOOKMARK [3][-]{subsubsection.2.4.5}{send\137combination\137in}{subsection.2.4}% 26
+\BOOKMARK [2][-]{subsection.2.5}{lib/Key.c}{section.2}% 27
+\BOOKMARK [3][-]{subsubsection.2.5.1}{key2Char}{subsection.2.5}% 28
+\BOOKMARK [1][-]{section.3}{Unit Tests}{}% 29
+\BOOKMARK [2][-]{subsection.3.1}{tests/keypad/keypad\137test.c}{section.3}% 30
+\BOOKMARK [2][-]{subsection.3.2}{tests/security/security\137test.c}{section.3}% 31
+\BOOKMARK [2][-]{subsection.3.3}{tests/timer/timer\137test.c}{section.3}% 32
+\BOOKMARK [2][-]{subsection.3.4}{tests/uart/uart\137test.c}{section.3}% 33
+\BOOKMARK [1][-]{section.4}{Conclusions and Future Work}{}% 34

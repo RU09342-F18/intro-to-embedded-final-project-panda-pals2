@@ -1,0 +1,28 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{c+c1}{// uart.c}
+
+\PYG{c+cp}{\PYGZsh{}include} \PYG{c+cpf}{\PYGZlt{}msp430.h\PYGZgt{}}
+\PYG{c+cp}{\PYGZsh{}include} \PYG{c+cpf}{\PYGZlt{}stdint.h\PYGZgt{}}
+
+\PYG{k+kt}{void} \PYG{n+nf}{setup\PYGZus{}uart}\PYG{p}{()} \PYG{p}{\PYGZob{}}
+    \PYG{n}{DCOCTL} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;}                               \PYG{c+c1}{// Select lowest DCOx and MODx settings}
+    \PYG{n}{BCSCTL1} \PYG{o}{=} \PYG{n}{CALBC1\PYGZus{}1MHZ}\PYG{p}{;}                    \PYG{c+c1}{// Set DCO}
+    \PYG{n}{DCOCTL} \PYG{o}{=} \PYG{n}{CALDCO\PYGZus{}1MHZ}\PYG{p}{;}
+    \PYG{n}{P1SEL} \PYG{o}{=} \PYG{n}{BIT1} \PYG{o}{+} \PYG{n}{BIT2} \PYG{p}{;}                     \PYG{c+c1}{// P1.1 = RXD, P1.2=TXD}
+    \PYG{n}{P1SEL2} \PYG{o}{=} \PYG{n}{BIT1} \PYG{o}{+} \PYG{n}{BIT2} \PYG{p}{;}                    \PYG{c+c1}{// P1.1 = RXD, P1.2=TXD}
+    \PYG{n}{UCA0CTL1} \PYG{o}{|=} \PYG{n}{UCSSEL\PYGZus{}2}\PYG{p}{;}                     \PYG{c+c1}{// SMCLK}
+    \PYG{n}{UCA0BR0} \PYG{o}{=} \PYG{l+m+mi}{104}\PYG{p}{;}                            \PYG{c+c1}{// 1MHz 9600}
+    \PYG{n}{UCA0BR1} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;}                              \PYG{c+c1}{// 1MHz 9600}
+    \PYG{n}{UCA0MCTL} \PYG{o}{=} \PYG{n}{UCBRS0}\PYG{p}{;}                        \PYG{c+c1}{// Modulation UCBRSx = 1}
+    \PYG{n}{UCA0CTL1} \PYG{o}{\PYGZam{}=} \PYG{o}{\PYGZti{}}\PYG{n}{UCSWRST}\PYG{p}{;}                     \PYG{c+c1}{// **Initialize USCI state machine**}
+    \PYG{n}{IE2} \PYG{o}{|=} \PYG{n}{UCA0RXIE}\PYG{p}{;}                          \PYG{c+c1}{// Enable USCI\PYGZus{}A0 RX interrupt}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{k+kt}{void} \PYG{n+nf}{send\PYGZus{}bytes}\PYG{p}{(}\PYG{k+kt}{char} \PYG{o}{*}\PYG{n}{bytes}\PYG{p}{,} \PYG{k+kt}{uint8\PYGZus{}t} \PYG{n}{length}\PYG{p}{)} \PYG{p}{\PYGZob{}}
+    \PYG{k}{while}\PYG{p}{(}\PYG{n}{length}\PYG{o}{\PYGZhy{}\PYGZhy{}}\PYG{p}{)} \PYG{p}{\PYGZob{}}
+        \PYG{k}{while} \PYG{p}{(}\PYG{o}{!}\PYG{p}{(}\PYG{n}{IFG2}\PYG{o}{\PYGZam{}}\PYG{n}{UCA0TXIFG}\PYG{p}{));}                \PYG{c+c1}{// USCI\PYGZus{}A0 TX buffer ready?}
+        \PYG{n}{UCA0TXBUF} \PYG{o}{=} \PYG{o}{*}\PYG{n}{bytes}\PYG{p}{;} \PYG{c+c1}{//Write the character}
+        \PYG{n}{bytes}\PYG{o}{++}\PYG{p}{;} \PYG{c+c1}{//Increment the bytes pointer to point to the next character}
+    \PYG{p}{\PYGZcb{}}
+\PYG{p}{\PYGZcb{}}
+\end{Verbatim}

@@ -1,0 +1,84 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{c+cm}{/**}
+\PYG{c+cm}{ * @file msp430g2553\PYGZus{}keypad\PYGZus{}lock.c}
+\PYG{c+cm}{ * @author John McAvoy}
+\PYG{c+cm}{ * @date 11 Dec 2018}
+\PYG{c+cm}{ * @desc main program that uses MSP430 as keypad combinational lock}
+\PYG{c+cm}{ */}
+
+\PYG{c+cp}{\PYGZsh{}include} \PYG{c+cpf}{\PYGZlt{}msp430.h\PYGZgt{}}
+\PYG{c+cp}{\PYGZsh{}include} \PYG{c+cpf}{\PYGZlt{}stdio.h\PYGZgt{}}
+\PYG{c+cp}{\PYGZsh{}include} \PYG{c+cpf}{\PYGZdq{}../lib/keypad.h\PYGZdq{} // setup\PYGZus{}keypad\PYGZus{}pins, handle\PYGZus{}keypress}
+\PYG{c+cp}{\PYGZsh{}include} \PYG{c+cpf}{\PYGZdq{}../lib/security.h\PYGZdq{} // setup\PYGZus{}lock\PYGZus{}pins, setup\PYGZus{}timeout\PYGZus{}timer, lock}
+\PYG{c+cp}{\PYGZsh{}include} \PYG{c+cpf}{\PYGZdq{}../lib/uart.h\PYGZdq{} // setup\PYGZus{}uart}
+
+\PYG{k+kt}{int} \PYG{n+nf}{main}\PYG{p}{(}\PYG{k+kt}{void}\PYG{p}{)}
+\PYG{p}{\PYGZob{}}
+
+  \PYG{n}{WDTCTL} \PYG{o}{=} \PYG{n}{WDTPW} \PYG{o}{+} \PYG{n}{WDTHOLD}\PYG{p}{;}                 \PYG{c+c1}{// Stop watchdog timer}
+
+  \PYG{n}{setup\PYGZus{}lock\PYGZus{}pins}\PYG{p}{();}
+  \PYG{n}{setup\PYGZus{}keypad\PYGZus{}pins}\PYG{p}{();}
+  \PYG{n}{setup\PYGZus{}timeout\PYGZus{}timer}\PYG{p}{();}
+  \PYG{n}{setup\PYGZus{}uart}\PYG{p}{();}
+
+  \PYG{k+kt}{char} \PYG{n}{welcome\PYGZus{}message}\PYG{p}{[}\PYG{l+m+mi}{27}\PYG{p}{]} \PYG{o}{=} \PYG{l+s}{\PYGZdq{}Keypad Lock \PYGZhy{} John McAvoy}\PYG{l+s+se}{\PYGZbs{}n\PYGZbs{}n}\PYG{l+s}{\PYGZdq{}}\PYG{p}{;}
+  \PYG{n}{send\PYGZus{}bytes}\PYG{p}{(}\PYG{n}{welcome\PYGZus{}message}\PYG{p}{,} \PYG{l+m+mi}{27}\PYG{p}{);}
+
+  \PYG{n}{\PYGZus{}\PYGZus{}bis\PYGZus{}SR\PYGZus{}register}\PYG{p}{(}\PYG{n}{GIE}\PYG{p}{);}       \PYG{c+c1}{// enable interrupts}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{c+c1}{// Timer A0 interrupt service routine}
+\PYG{c+cp}{\PYGZsh{}if defined(\PYGZus{}\PYGZus{}TI\PYGZus{}COMPILER\PYGZus{}VERSION\PYGZus{}\PYGZus{}) || defined(\PYGZus{}\PYGZus{}IAR\PYGZus{}SYSTEMS\PYGZus{}ICC\PYGZus{}\PYGZus{})}
+\PYG{c+cp}{\PYGZsh{}pragma vector=TIMER0\PYGZus{}A1\PYGZus{}VECTOR}
+\PYG{n}{\PYGZus{}\PYGZus{}interrupt} \PYG{k+kt}{void} \PYG{n+nf}{Timer0\PYGZus{}A1} \PYG{p}{(}\PYG{k+kt}{void}\PYG{p}{)}
+\PYG{c+cp}{\PYGZsh{}elif defined(\PYGZus{}\PYGZus{}GNUC\PYGZus{}\PYGZus{})}
+\PYG{k+kt}{void} \PYG{n}{\PYGZus{}\PYGZus{}attribute\PYGZus{}\PYGZus{}} \PYG{p}{((}\PYG{n}{interrupt}\PYG{p}{(}\PYG{n}{TIMER0\PYGZus{}A1\PYGZus{}VECTOR}\PYG{p}{)))} \PYG{n}{Timer0\PYGZus{}A1} \PYG{p}{(}\PYG{k+kt}{void}\PYG{p}{)}
+\PYG{c+cp}{\PYGZsh{}else}
+\PYG{c+cp}{\PYGZsh{}error Compiler not supported!}
+\PYG{c+cp}{\PYGZsh{}endif}
+\PYG{p}{\PYGZob{}}
+    \PYG{n}{stop\PYGZus{}timeout\PYGZus{}timer}\PYG{p}{();}
+    \PYG{n}{lock}\PYG{p}{();} \PYG{c+c1}{// lock}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{c+cp}{\PYGZsh{}if defined(\PYGZus{}\PYGZus{}TI\PYGZus{}COMPILER\PYGZus{}VERSION\PYGZus{}\PYGZus{}) || defined(\PYGZus{}\PYGZus{}IAR\PYGZus{}SYSTEMS\PYGZus{}ICC\PYGZus{}\PYGZus{})}
+\PYG{c+cp}{\PYGZsh{}pragma vector=USCIAB0RX\PYGZus{}VECTOR}
+\PYG{n}{\PYGZus{}\PYGZus{}interrupt} \PYG{k+kt}{void} \PYG{n+nf}{USCI0RX\PYGZus{}ISR}\PYG{p}{(}\PYG{k+kt}{void}\PYG{p}{)}
+\PYG{c+cp}{\PYGZsh{}elif defined(\PYGZus{}\PYGZus{}GNUC\PYGZus{}\PYGZus{})}
+\PYG{k+kt}{void} \PYG{n}{\PYGZus{}\PYGZus{}attribute\PYGZus{}\PYGZus{}} \PYG{p}{((}\PYG{n}{interrupt}\PYG{p}{(}\PYG{n}{USCIAB0RX\PYGZus{}VECTOR}\PYG{p}{)))} \PYG{n}{USCI0RX\PYGZus{}ISR} \PYG{p}{(}\PYG{k+kt}{void}\PYG{p}{)}
+\PYG{c+cp}{\PYGZsh{}else}
+\PYG{c+cp}{\PYGZsh{}error Compiler not supported!}
+\PYG{c+cp}{\PYGZsh{}endif}
+\PYG{p}{\PYGZob{}}
+    \PYG{k+kt}{unsigned} \PYG{k+kt}{char} \PYG{n}{data} \PYG{o}{=} \PYG{n}{UCA0RXBUF}\PYG{p}{;}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{c+c1}{// Port 1 interrupt service routine}
+\PYG{c+cp}{\PYGZsh{}if defined(\PYGZus{}\PYGZus{}TI\PYGZus{}COMPILER\PYGZus{}VERSION\PYGZus{}\PYGZus{}) || defined(\PYGZus{}\PYGZus{}IAR\PYGZus{}SYSTEMS\PYGZus{}ICC\PYGZus{}\PYGZus{})}
+\PYG{c+cp}{\PYGZsh{}pragma vector=PORT1\PYGZus{}VECTOR}
+\PYG{n}{\PYGZus{}\PYGZus{}interrupt} \PYG{k+kt}{void} \PYG{n+nf}{Port\PYGZus{}1}\PYG{p}{(}\PYG{k+kt}{void}\PYG{p}{)}
+\PYG{c+cp}{\PYGZsh{}elif defined(\PYGZus{}\PYGZus{}GNUC\PYGZus{}\PYGZus{})}
+\PYG{k+kt}{void} \PYG{n}{\PYGZus{}\PYGZus{}attribute\PYGZus{}\PYGZus{}} \PYG{p}{((}\PYG{n}{interrupt}\PYG{p}{(}\PYG{n}{PORT1\PYGZus{}VECTOR}\PYG{p}{)))} \PYG{n}{Port\PYGZus{}1} \PYG{p}{(}\PYG{k+kt}{void}\PYG{p}{)}
+\PYG{c+cp}{\PYGZsh{}else}
+\PYG{c+cp}{\PYGZsh{}error Compiler not supported!}
+\PYG{c+cp}{\PYGZsh{}endif}
+\PYG{p}{\PYGZob{}}
+    \PYG{n}{handle\PYGZus{}key\PYGZus{}press}\PYG{p}{();}
+    \PYG{n}{clear\PYGZus{}key\PYGZus{}interupt\PYGZus{}flags}\PYG{p}{();}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{c+c1}{// Port 2 interrupt service routine}
+\PYG{c+cp}{\PYGZsh{}if defined(\PYGZus{}\PYGZus{}TI\PYGZus{}COMPILER\PYGZus{}VERSION\PYGZus{}\PYGZus{}) || defined(\PYGZus{}\PYGZus{}IAR\PYGZus{}SYSTEMS\PYGZus{}ICC\PYGZus{}\PYGZus{})}
+\PYG{c+cp}{\PYGZsh{}pragma vector=PORT2\PYGZus{}VECTOR}
+\PYG{n}{\PYGZus{}\PYGZus{}interrupt} \PYG{k+kt}{void} \PYG{n+nf}{Port\PYGZus{}2}\PYG{p}{(}\PYG{k+kt}{void}\PYG{p}{)}
+\PYG{c+cp}{\PYGZsh{}elif defined(\PYGZus{}\PYGZus{}GNUC\PYGZus{}\PYGZus{})}
+\PYG{k+kt}{void} \PYG{n}{\PYGZus{}\PYGZus{}attribute\PYGZus{}\PYGZus{}} \PYG{p}{((}\PYG{n}{interrupt}\PYG{p}{(}\PYG{n}{PORT2\PYGZus{}VECTOR}\PYG{p}{)))} \PYG{n}{Port\PYGZus{}2} \PYG{p}{(}\PYG{k+kt}{void}\PYG{p}{)}
+\PYG{c+cp}{\PYGZsh{}else}
+\PYG{c+cp}{\PYGZsh{}error Compiler not supported!}
+\PYG{c+cp}{\PYGZsh{}endif}
+\PYG{p}{\PYGZob{}}
+    \PYG{n}{handle\PYGZus{}key\PYGZus{}press}\PYG{p}{();}
+    \PYG{n}{clear\PYGZus{}key\PYGZus{}interupt\PYGZus{}flags}\PYG{p}{();}
+\PYG{p}{\PYGZcb{}}
+\end{Verbatim}
